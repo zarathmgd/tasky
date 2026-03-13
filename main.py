@@ -3,6 +3,7 @@ from tkinter import messagebox
 import database
 import re
 
+# Configuration globale du thème
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
@@ -11,13 +12,22 @@ class TaskyApp(ctk.CTk):
         super().__init__()
         self.title("Tasky")
         self.geometry("450x600")
+        
+        # Initialise les tables et l'admin au démarrage
         database.init_bd()
+        
+        # Variables de session (ID et rôle du user connecté)
         self.current_user_id, self.current_user_role = None, None
+        
+        # Lance la première vue
         self.show_login()
 
     def clear_screen(self):
+        # Nettoyage de la fenêtre avant de changer de page
         for widget in self.winfo_children():
             widget.destroy()
+
+    # --- PARTIE CONNEXION / INSCRIPTION ---
 
     def show_login(self):
         self.clear_screen()
@@ -30,6 +40,7 @@ class TaskyApp(ctk.CTk):
         ctk.CTkButton(self, text="Sign in", fg_color="transparent", border_width=1, command=self.show_register).pack(pady=10)
 
     def verify_login(self):
+        # Vérification en base et récupération des droits
         user_data = database.login_check(self.entry_pseudo.get(), self.entry_pass.get())
         if user_data:
             self.current_user_id, self.current_user_role = user_data["id"], user_data["role"]
@@ -49,6 +60,7 @@ class TaskyApp(ctk.CTk):
 
     def register_user(self):
         pseudo, password = self.entry_new_pseudo.get(), self.entry_new_pass.get()
+        # Sécurité : 12 car., 1 Maj, 1 Chiffre (Standard cybersécurité)
         if not re.match(r"^(?=.*[A-Z])(?=.*\d).{12,}$", password):
             messagebox.showerror("Error", "12 chars min, 1 Uppercase, 1 Digit.")
             return
@@ -59,8 +71,11 @@ class TaskyApp(ctk.CTk):
             else:
                 messagebox.showerror("Error", "Pseudo already used.")
 
+    # --- PARTIE GESTION DES TÂCHES ---
+
     def show_tasks(self):
         self.clear_screen()
+        # Adaptation de l'interface selon le rôle (RBAC)
         welcome = "Administrator Mode" if self.current_user_role == "admin" else "Tasky - My Tasks"
         ctk.CTkLabel(self, text=welcome, font=("Arial", 20, "bold")).pack(pady=20)
         
@@ -70,20 +85,25 @@ class TaskyApp(ctk.CTk):
         if self.current_user_role == "admin":
             ctk.CTkButton(btn_frame, text="Users", fg_color="#ff8c00", width=100, command=self.show_users_admin).pack(side="left", padx=5)
 
+        # Formulaire pour ajouter une tâche
         self.entry_task = ctk.CTkEntry(self, placeholder_text="New task...")
         self.entry_task.pack(pady=5)
         
+        # Liste déroulante des catégories récupérées en BDD
         self.cat_data = database.get_categories()
         cat_names = [cat[1] for cat in self.cat_data]
         self.menu_category = ctk.CTkOptionMenu(self, values=cat_names)
         self.menu_category.pack(pady=5)
         
         ctk.CTkButton(self, text="Add Task", command=self.add_new_task).pack(pady=5)
+        
+        # Zone défilante pour l'affichage des tâches
         self.scrollter = ctk.CTkScrollableFrame(self, width=400, height=300)
         self.scrollter.pack(pady=20, fill="both", expand=True)
         self.load_tasks_list()
 
     def add_new_task(self):
+        # Mappe le nom choisi vers l'ID correspondant
         title, cat_name = self.entry_task.get(), self.menu_category.get()
         cat_id = next((c[0] for c in self.cat_data if c[1] == cat_name), None)
         if title and cat_id:
@@ -93,6 +113,7 @@ class TaskyApp(ctk.CTk):
 
     def load_tasks_list(self):
         for widget in self.scrollter.winfo_children(): widget.destroy()
+        # Filtre les tâches : siennes uniquement (User) ou toutes (Admin)
         tasks = database.get_tasks(self.current_user_id, self.current_user_role)
         statuts = ["À faire", "En cours", "Annulée", "Terminée"]
         
@@ -103,17 +124,14 @@ class TaskyApp(ctk.CTk):
             
             ctk.CTkLabel(row, text=f"[{cname}] {title}", anchor="w", width=180).pack(side="left", padx=5)
             
-            # Menu de statut
+            # Menu de statut avec mise à jour immédiate via callback
             s_var = ctk.StringVar(value=status)
             ctk.CTkOptionMenu(row, values=statuts, variable=s_var, width=100, font=("Arial", 10),
                              command=lambda v, i=tid: database.update_task_status(i, v)).pack(side="left", padx=2)
             
-            # Actions
+            # Boutons de modification (pop-up) et de suppression
             ctk.CTkButton(row, text="✎", width=30, command=lambda i=tid: self.edit_task_action(i)).pack(side="left", padx=2)
             ctk.CTkButton(row, text="X", width=30, fg_color="#cc0000", command=lambda i=tid: self.delete_task_action(i)).pack(side="left", padx=2)
-
-    def change_status_action(self, task_id, new_status):
-        database.update_task_status(task_id, new_status)
 
     def edit_task_action(self, task_id):
         dialog = ctk.CTkInputDialog(text="New title:", title="Edit")
@@ -125,6 +143,8 @@ class TaskyApp(ctk.CTk):
     def delete_task_action(self, task_id):
         database.delete_task(task_id)
         self.load_tasks_list()
+
+    # --- PARTIE ADMIN ---
 
     def show_users_admin(self):
         self.clear_screen()
@@ -141,6 +161,7 @@ class TaskyApp(ctk.CTk):
             row = ctk.CTkFrame(self.scrollter)
             row.pack(fill="x", pady=2)
             ctk.CTkLabel(row, text=f"{upseudo} ({urole})").pack(side="left", padx=10)
+            # Empêche l'admin de se suicider numériquement
             if uid != self.current_user_id:
                 ctk.CTkButton(row, text="Delete", fg_color="#cc0000", width=60,
                              command=lambda i=uid: self.delete_user_action(i)).pack(side="right", padx=5)
@@ -151,6 +172,7 @@ class TaskyApp(ctk.CTk):
             self.load_users_list()
 
     def logout_action(self):
+        # Reset de la session et retour au login
         self.current_user_id = self.current_user_role = None
         self.show_login()
 

@@ -33,7 +33,7 @@ Prérequis : Python doit être installé sur la machine.
 
 1.  Cloner le dépôt :
     ```bash
-    git clone [https://github.com/zarathmgd/Tasky.git](https://github.com/zarathmgd/Tasky.git)
+    git clone https://github.com/zarathmgd/Tasky.git
     cd Tasky
     ```
 

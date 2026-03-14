@@ -9,16 +9,17 @@ L'application implémente un cycle CRUD complet et la gestion multi-utilisateurs
 * **Authentification :** Système d'inscription et de connexion. Les données de chaque utilisateur sont isolées.
 * **Création :** Ajout de nouvelles tâches associées à l'utilisateur connecté.
 * **Lecture :** Affichage de la liste des tâches avec persistance des données.
-* **Mise à jour :** Modification du statut (À faire / Fait) et édition du titre de la tâche.
+* **Mise à jour :** Modification dynamique du statut (À faire, En cours, Annulée, Terminée) et édition du titre de la tâche.
 * **Suppression :** Retrait définitif d'une tâche de la base de données.
+* **Administration : Panel administrateur permettant la supervision des comptes utilisateurs.
 * **Persistance :** Sauvegarde automatique dans une base de données locale SQLite.
 
 ## Environnement Technique
 
 * **Langage :** Python 3.x
-* **Interface Graphique :** CustomTkinter (Wrapper moderne de Tkinter)
-* **Base de Données :** SQLite3 (Intégré à Python)
-* **Déploiement :** PyInstaller (Compilation en exécutable Windows)
+* **Interface Graphique :** CustomTkinter
+* **Base de Données :** SQLite3
+* **Déploiement :** PyInstaller
 
 ## Architecture du Code
 
@@ -53,8 +54,8 @@ Une version compilée autonome est disponible pour le déploiement.
 
 1.  Accédez à la section **Releases** de ce dépôt.
 2.  Téléchargez le fichier **Tasky.exe**.
-3.  Lancez l'application. Une base de données vide sera automatiquement créée.
+3.  Lancez l'application. Une base de données structurée sera automatiquement créée avec un compte de admin par défaut (Pseudo : admin / Mot de passe : Admin123456789!)
 
 ## Auteur
 
-Projet développé par [Ton Prénom] [Ton Nom] - BTS SIO.
+Projet développé par Zarath Mougamadou - BTS SIO.

@@ -54,7 +54,8 @@ Une version compilée autonome est disponible pour le déploiement.
 
 1.  Accédez à la section **Releases** de ce dépôt.
 2.  Téléchargez le fichier **Tasky.exe**.
-3.  Lancez l'application. Une base de données structurée sera automatiquement créée avec un compte de admin par défaut (Pseudo : admin / Mot de passe : Admin123456789!)
+3.  Lancez l'application. Une base de données structurée sera automatiquement créée avec un compte de admin par défaut :
+**Pseudo : admin / Mot de passe : Admin123456789!**
 
 ## Auteur
 
